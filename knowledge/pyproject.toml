@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shopkeeper-brain"
+version = "0.1.0"
+description = "基于 RAG 的智能知识库问答系统"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "pydantic-settings>=2,<3",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

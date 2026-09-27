@@ -1,0 +1,18 @@
+# Local secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+
+# Runtime data
+temp_data/
+
