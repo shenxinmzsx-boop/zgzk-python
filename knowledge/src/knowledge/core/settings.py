@@ -8,12 +8,13 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ENV_FILE = PROJECT_ROOT / ".env"
 
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file = ENV_FILE,
-        env_file_encoding = "utf-8",
-        case_sensitive = False,
-        extra = "forbid",
+        env_file=ENV_FILE,
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="forbid",
     )
 
     milvus_uri: str = Field(min_length=1)
@@ -28,6 +29,12 @@ class Settings(BaseSettings):
     minio_access_key: str = Field(min_length=1)
     minio_secret_key: SecretStr = Field(min_length=1)
     minio_secure: bool
+    minio_bucket_name: str = Field(
+        min_length=3,
+        max_length=63,
+        pattern=r"^[a-z0-9][a-z0-9.-]*[a-z0-9]$",
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
