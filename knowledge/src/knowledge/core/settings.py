@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     mongo_username: str = Field(min_length=1)
     mongo_password: SecretStr = Field(min_length=1)
     mongo_auth_source: str = Field(min_length=1)
+    mongo_database: str = Field(min_length=1)
+    mongo_documents_collection: str = Field(min_length=1)
+    mongo_server_selection_timeout_ms: int = Field(gt=0, le=60_000)
 
     minio_endpoint: str = Field(min_length=1)
     minio_access_key: str = Field(min_length=1)
