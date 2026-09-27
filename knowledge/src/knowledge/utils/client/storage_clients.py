@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from minio import Minio
 
 from knowledge.core.settings import Settings
@@ -18,3 +20,34 @@ def ensure_minio_bucket(client: Minio, bucket_name: str) -> bool:
 
     client.make_bucket(bucket_name)
     return True
+
+
+def upload_text(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    content: str,
+) -> None:
+    data = content.encode("utf-8")
+
+    client.put_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        data=BytesIO(data),
+        length=len(data),
+        content_type="text/plain; charset=utf-8",
+    )
+
+
+def download_text(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+) -> str:
+    response = client.get_object(bucket_name, object_name)
+
+    try:
+        return response.read().decode("utf-8")
+    finally:
+        response.close()
+        response.release_conn()
