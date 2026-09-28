@@ -24,6 +24,22 @@ def ensure_minio_bucket(client: Minio, bucket_name: str) -> bool:
     return True
 
 
+def upload_bytes(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+    data: bytes,
+    content_type: str,
+) -> None:
+    client.put_object(
+        bucket_name=bucket_name,
+        object_name=object_name,
+        data=BytesIO(data),
+        length=len(data),
+        content_type=content_type,
+    )
+
+
 def upload_text(
     client: Minio,
     bucket_name: str,
@@ -32,13 +48,27 @@ def upload_text(
 ) -> None:
     data = content.encode("utf-8")
 
-    client.put_object(
+    upload_bytes(
+        client=client,
         bucket_name=bucket_name,
         object_name=object_name,
-        data=BytesIO(data),
-        length=len(data),
+        data=data,
         content_type="text/plain; charset=utf-8",
     )
+
+
+def download_bytes(
+    client: Minio,
+    bucket_name: str,
+    object_name: str,
+) -> bytes:
+    response = client.get_object(bucket_name, object_name)
+
+    try:
+        return response.read()
+    finally:
+        response.close()
+        response.release_conn()
 
 
 def download_text(
@@ -46,13 +76,13 @@ def download_text(
     bucket_name: str,
     object_name: str,
 ) -> str:
-    response = client.get_object(bucket_name, object_name)
+    data = download_bytes(
+        client=client,
+        bucket_name=bucket_name,
+        object_name=object_name,
+    )
 
-    try:
-        return response.read().decode("utf-8")
-    finally:
-        response.close()
-        response.release_conn()
+    return data.decode("utf-8")
 
 
 def create_mongo_client(settings: Settings) -> MongoClient[dict[str, Any]]:

@@ -1,17 +1,26 @@
-from knowledge.core.settings import get_settings
+from hashlib import sha256
+from pathlib import Path
+
+from knowledge.core.settings import PROJECT_ROOT, get_settings
 from knowledge.utils.client.storage_clients import (
     create_minio_client,
     create_mongo_client,
-    download_text,
+    download_bytes,
     ensure_minio_bucket,
     ping_mongodb,
-    upload_text,
+    upload_bytes,
 )
 from knowledge.utils.document_metadata import (
+    ensure_document_metadata_indexes,
     find_document_metadata,
     upsert_document_metadata,
-    ensure_document_metadata_indexes,
 )
+
+
+def read_file_with_sha256(file_path: Path) -> tuple[bytes, str]:
+    content = file_path.read_bytes()
+    digest = sha256(content).hexdigest()
+    return content, digest
 
 
 def main() -> None:
@@ -28,24 +37,30 @@ def main() -> None:
     print("MinIO 连接成功")
     print(f"Bucket {status}: {settings.minio_bucket_name}")
 
-    object_name = "smoke-test/hello.txt"
-    expected_content = "掌柜智库MinIO读写测试"
+    source_path = PROJECT_ROOT / "examples" / "sample_knowledge.txt"
+    object_name = "documents/sample_knowledge.txt"
+    content_type = "text/plain; charset=utf-8"
 
-    upload_text(
+    source_data, source_sha256 = read_file_with_sha256(source_path)
+
+    upload_bytes(
         client=client,
         bucket_name=settings.minio_bucket_name,
         object_name=object_name,
-        content=expected_content,
+        data=source_data,
+        content_type=content_type,
     )
 
-    actual_content = download_text(
+    downloaded_data = download_bytes(
         client=client,
         bucket_name=settings.minio_bucket_name,
         object_name=object_name,
     )
 
-    if actual_content != expected_content:
-        raise RuntimeError("MinIO 下载内容与上传内容不一致")
+    downloaded_sha256 = sha256(downloaded_data).hexdigest()
+
+    if downloaded_sha256 != source_sha256:
+        raise RuntimeError("MinIO 下载内容与本地文件 SHA-256 不一致")
 
     mongo_client = create_mongo_client(settings)
 
@@ -64,8 +79,10 @@ def main() -> None:
             collection,
             bucket_name=settings.minio_bucket_name,
             object_name=object_name,
-            content_type="text/plain; charset=utf-8",
-            size=len(expected_content.encode("utf-8")),
+            original_filename=source_path.name,
+            content_type=content_type,
+            size=len(source_data),
+            sha256=source_sha256,
         )
 
         metadata = find_document_metadata(
@@ -85,7 +102,9 @@ def main() -> None:
         mongo_client.close()
 
     print(f"对象读写成功: {object_name}")
-    print(f"对象内容: {actual_content}")
+    print(f"原始文件: {source_path.name}")
+    print(f"文件大小: {len(source_data)} bytes")
+    print(f"SHA-256: {source_sha256}")
 
 
 if __name__ == "__main__":

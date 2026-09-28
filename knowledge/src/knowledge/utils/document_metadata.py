@@ -9,8 +9,10 @@ def upsert_document_metadata(
     *,
     bucket_name: str,
     object_name: str,
+    original_filename: str,
     content_type: str,
     size: int,
+    sha256: str,
 ) -> bool:
     result = collection.update_one(
         {
@@ -19,8 +21,10 @@ def upsert_document_metadata(
         },
         {
             "$set": {
+                "original_filename": original_filename,
                 "content_type": content_type,
                 "size": size,
+                "sha256": sha256,
             },
         },
         upsert=True,
