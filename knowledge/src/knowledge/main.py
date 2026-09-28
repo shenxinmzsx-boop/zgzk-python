@@ -10,6 +10,7 @@ from knowledge.utils.client.storage_clients import (
 from knowledge.utils.document_metadata import (
     find_document_metadata,
     upsert_document_metadata,
+    ensure_document_metadata_indexes,
 )
 
 
@@ -57,6 +58,8 @@ def main() -> None:
             settings.mongo_documents_collection
         ]
 
+        index_name = ensure_document_metadata_indexes(collection)
+        print(f"MongoDB 索引已就绪: {index_name}")
         metadata_created = upsert_document_metadata(
             collection,
             bucket_name=settings.minio_bucket_name,

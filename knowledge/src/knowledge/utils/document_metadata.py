@@ -1,5 +1,6 @@
 from typing import Any
 
+from pymongo import ASCENDING
 from pymongo.collection import Collection
 
 
@@ -40,4 +41,17 @@ def find_document_metadata(
             "object_name": object_name,
         },
         {"_id": False},
+    )
+
+
+def ensure_document_metadata_indexes(
+    collection: Collection[dict[str, Any]],
+) -> str:
+    return collection.create_index(
+        [
+            ("bucket_name", ASCENDING),
+            ("object_name", ASCENDING),
+        ],
+        unique=True,
+        name="uq_documents_bucket_object",
     )
