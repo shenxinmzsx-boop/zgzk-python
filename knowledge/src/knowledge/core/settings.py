@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     mongo_auth_source: str = Field(min_length=1)
     mongo_database: str = Field(min_length=1)
     mongo_documents_collection: str = Field(min_length=1)
+    mongo_document_chunks_collection: str = Field(min_length=1)
     mongo_server_selection_timeout_ms: int = Field(gt=0, le=60_000)
 
     minio_endpoint: str = Field(min_length=1)
