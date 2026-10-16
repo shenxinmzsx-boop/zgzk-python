@@ -11,6 +11,8 @@ dependencies = [
     "pydantic-settings>=2,<3",
     "minio>=7,<8",
     "pymongo>=4.18,<5",
+    "pymilvus>=2.5,<2.6",
+    "openai>=3,<4",
 ]
 
 [tool.setuptools.packages.find]

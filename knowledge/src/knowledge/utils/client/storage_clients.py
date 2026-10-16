@@ -3,6 +3,7 @@ from typing import Any
 
 from minio import Minio
 from pymongo import MongoClient
+from pymilvus import MilvusClient
 
 from knowledge.core.settings import Settings
 
@@ -98,3 +99,7 @@ def create_mongo_client(settings: Settings) -> MongoClient[dict[str, Any]]:
 
 def ping_mongodb(client: MongoClient[dict[str, Any]]) -> None:
     client.admin.command("ping")
+
+
+def create_milvus_client(settings: Settings) -> MilvusClient:
+    return MilvusClient(uri=settings.milvus_uri)

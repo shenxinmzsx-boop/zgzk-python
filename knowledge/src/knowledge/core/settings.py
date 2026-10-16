@@ -18,6 +18,13 @@ class Settings(BaseSettings):
     )
 
     milvus_uri: str = Field(min_length=1)
+    milvus_collection_name: str = Field(min_length=1)
+    milvus_embedding_dimension: int = Field(gt=0)
+    embedding_api_base_url: str = Field(min_length=1)
+    embedding_api_key: SecretStr = Field(min_length=1)
+    embedding_model_name: str = Field(min_length=1)
+    embedding_timeout_seconds: float = Field(gt=0, le=120)
+    chat_model_name: str = Field(min_length=1)
 
     mongo_host: str = Field(min_length=1)
     mongo_port: int = Field(ge=1, le=65535)
